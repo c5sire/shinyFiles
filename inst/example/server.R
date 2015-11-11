@@ -2,7 +2,9 @@ library(shiny)
 library(shinyFiles)
 
 shinyServer(function(input, output, session) {
-    volumes <- c('R Installation'=R.home())
+    #volumes <- c('R Installation'=R.home())
+    volumes <- getVolumes(c("(E:)", "Page File (F:)"))
+    #print(volumes)
     shinyFileChoose(input, 'file', roots=volumes, session=session, restrictions=system.file(package='base'))
     shinyDirChoose(input, 'directory', roots=volumes, session=session, restrictions=system.file(package='base'))
     shinyFileSave(input, 'save', roots=volumes, session=session, restrictions=system.file(package='base'))
