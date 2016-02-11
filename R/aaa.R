@@ -53,10 +53,42 @@ shinyFilesExample <- function() {
 #' 
 #' @export
 #' 
+# getVolumes <- function(exclude) {
+#     if(missing(exclude)) exclude <- NULL
+#     
+#     osSystem <- Sys.info()['sysname']
+#     if (osSystem == 'Darwin') {
+#         volumes <- list.files('/Volumes/', full.names=T)
+#         names(volumes) <- basename(volumes)
+#     } else if (osSystem == 'Linux') {
+#         volumes <- c('Computer'='/')
+#         media <- list.files('/media/', full.names=T)
+#         names(media) <- basename(media)
+#         volumes <- c(volumes, media)
+#     } else if (osSystem == 'Windows') {
+#         volumes <- system('wmic logicaldisk get Caption', intern=T)
+#         volumes <- sub(' *\\r$', '', volumes)
+#         keep <- !tolower(volumes) %in% c('caption', '')
+#         volumes <- volumes[keep]
+#         volNames <- system('wmic logicaldisk get VolumeName', intern=T)
+#         volNames <- sub(' *\\r$', '', volNames)
+#         volNames <- volNames[keep]
+#         volNames <- paste0(volNames, ' (', volumes, ')')
+#         names(volumes) <- volNames
+#     } else {
+#         stop('unsupported OS')
+#     }
+#     if (!is.null(exclude)) {
+#         volumes <- volumes[!names(volumes) %in% exclude]
+#     }
+#     volumes
+# }
+
 getVolumes <- function(exclude) {
     if(missing(exclude)) exclude <- NULL
     
     osSystem <- Sys.info()['sysname']
+    print(osSystem)
     if (osSystem == 'Darwin') {
         volumes <- list.files('/Volumes/', full.names=T)
         names(volumes) <- basename(volumes)
@@ -66,11 +98,29 @@ getVolumes <- function(exclude) {
         names(media) <- basename(media)
         volumes <- c(volumes, media)
     } else if (osSystem == 'Windows') {
-        volumes <- system('wmic logicaldisk get Caption', intern=T)
+        
+        volumes_flag <- tryCatch(system('wmic logicaldisk get Caption'),error = function(e)e)
+        volumes_flag <- volumes_flag>0
+        print(volumes_flag)
+        if(volumes_flag){ 
+            dr=getwd()
+            setwd("C:/windows/system32/wbem")
+            volumes <- system('wmic logicaldisk get Caption', intern=T)
+            setwd(dr)
+        }
+        if(!volumes_flag){volumes <- system('wmic logicaldisk get Caption', intern=T)}
         volumes <- sub(' *\\r$', '', volumes)
         keep <- !tolower(volumes) %in% c('caption', '')
         volumes <- volumes[keep]
-        volNames <- system('wmic logicaldisk get VolumeName', intern=T)
+        
+        if(volumes_flag){ 
+            dr=getwd()
+            setwd("C:/windows/system32/wbem")
+            volNames <- system('wmic logicaldisk get VolumeName', intern=T)
+            setwd(dr)
+        }
+        if(!volumes_flag){volNames <- system('wmic logicaldisk get VolumeName', intern=T)}
+        
         volNames <- sub(' *\\r$', '', volNames)
         volNames <- volNames[keep]
         volNames <- paste0(volNames, ' (', volumes, ')')
@@ -82,4 +132,7 @@ getVolumes <- function(exclude) {
         volumes <- volumes[!names(volumes) %in% exclude]
     }
     volumes
+    
+    
+    
 }
