@@ -88,7 +88,7 @@ getVolumes <- function(exclude) {
     if(missing(exclude)) exclude <- NULL
     
     osSystem <- Sys.info()['sysname']
-    print(osSystem)
+    #print(osSystem)
     if (osSystem == 'Darwin') {
         volumes <- list.files('/Volumes/', full.names=T)
         names(volumes) <- basename(volumes)
@@ -101,7 +101,7 @@ getVolumes <- function(exclude) {
         
         volumes_flag <- tryCatch(system('wmic logicaldisk get Caption'),error = function(e)e)
         volumes_flag <- volumes_flag>0
-        print(volumes_flag)
+        #print(volumes_flag)
         if(volumes_flag){ 
             dr=getwd()
             setwd("C:/windows/system32/wbem")
